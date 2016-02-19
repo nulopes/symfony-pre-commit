@@ -129,14 +129,14 @@ class CodeQualityTool extends Application
     {
         $needle = self::PHP_FILES_IN_SRC;
         $succeed = true;
-        $rootPath = realpath(__DIR__ . '/../../');
+        $rootPath = realpath(__DIR__ . '/../../../../');
  
         foreach ($files as $file) {
             if (!preg_match($needle, $file) || preg_match('/src\/AtrapaloLib\/ORM\/Doctrine\/DBAL\/Driver\/Adodb/', $file)) {
                 continue;
             }
  
-            $processBuilder = new ProcessBuilder(['php', 'bin/phpmd', $file, 'text', 'controversial']);
+            $processBuilder = new ProcessBuilder(['php', 'bin/phpmd', $file, 'text', 'design']);
             $processBuilder->setWorkingDirectory($rootPath);
             $process = $processBuilder->getProcess();
             $process->run();
@@ -156,8 +156,8 @@ class CodeQualityTool extends Application
  
     private function unitTests()
     {
-        $processBuilder = new ProcessBuilder(array('php', 'bin/phpunit'));
-        $processBuilder->setWorkingDirectory(__DIR__ . '/../..');
+        $processBuilder = new ProcessBuilder(array('php', 'bin/phpunit', '-c', 'app'));
+        $processBuilder->setWorkingDirectory(__DIR__ . '/../../../..');
         $processBuilder->setTimeout(3600);
         $phpunit = $processBuilder->getProcess();
  
@@ -186,11 +186,13 @@ class CodeQualityTool extends Application
             }
             $processBuilder = new ProcessBuilder(array('php', 'bin/php-cs-fixer', '--dry-run', '--verbose', 'fix', $file, '--fixers='.$fixers));
  
-            $processBuilder->setWorkingDirectory(__DIR__ . '/../../');
+            $processBuilder->setWorkingDirectory(__DIR__ . '/../../../../');
+
             $phpCsFixer = $processBuilder->getProcess();
             $phpCsFixer->run();
  
             if (!$phpCsFixer->isSuccessful()) {
+                //$this->output->writeln(sprintf('<error>%s - %s</error>', trim($phpCsFixer->getCommandLine()), trim($phpCsFixer->getOutput())));
                 $this->output->writeln(sprintf('<error>%s</error>', trim($phpCsFixer->getOutput())));
  
                 if ($succeed) {
@@ -212,8 +214,8 @@ class CodeQualityTool extends Application
                 continue;
             }
  
-            $processBuilder = new ProcessBuilder(array('php', 'bin/phpcs', '--standard=PSR2', $file));
-            $processBuilder->setWorkingDirectory(__DIR__ . '/../../');
+            $processBuilder = new ProcessBuilder(array('php', 'bin/phpcs', '--standard=PSR2', '-n', $file));
+            $processBuilder->setWorkingDirectory(__DIR__ . '/../../../../');
             $phpCsFixer = $processBuilder->getProcess();
             $phpCsFixer->run();
  
